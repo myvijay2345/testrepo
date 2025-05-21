@@ -6,10 +6,7 @@ pipeline {
             args  '-v /var/run/docker:/var/run/docker.sock'
         }
     }
-    options {
-        ansiColor('xterm')
-    }
-    parameters {
+     parameters {
         choice(
             choices: ['preview' , 'apply' , 'show', 'preview-destroy' , 'destroy'],
             description: 'Terraform action to apply',
