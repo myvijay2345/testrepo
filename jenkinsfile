@@ -1,9 +1,15 @@
 pipeline {
     agent {
-docker{ image 'terraform-alpine'
-}}
-
-parameters {
+        docker {
+            image 'hashicorp/terraform:latest'
+            label 'LINUX-SLAVE'
+            args  '--entrypoint="" -u root -v /opt/jenkins/.aws:/root/.aws'
+        }
+    }
+    options {
+        ansiColor('xterm')
+    }
+    parameters {
         choice(
             choices: ['preview' , 'apply' , 'show', 'preview-destroy' , 'destroy'],
             description: 'Terraform action to apply',
@@ -33,5 +39,38 @@ parameters {
                 sh 'terraform plan -var aws_profile=${AWS_PROFILE}'
             }
         }
-}
+        stage('apply') {
+            when {
+                expression { params.action == 'apply' }
+            }
+            steps {
+                sh 'terraform plan -out=plan -var aws_profile=${AWS_PROFILE}'
+                sh 'terraform apply -auto-approve plan'
+            }
+        }
+        stage('show') {
+            when {
+                expression { params.action == 'show' }
+            }
+            steps {
+                sh 'terraform show'
+            }
+        }
+        stage('preview-destroy') {
+            when {
+                expression { params.action == 'preview-destroy' }
+            }
+            steps {
+                sh 'terraform plan -destroy -var aws_profile=${AWS_PROFILE}'
+            }
+        }
+        stage('destroy') {
+            when {
+                expression { params.action == 'destroy' }
+            }
+            steps {
+                sh 'terraform destroy -force -var aws_profile=${AWS_PROFILE}'
+            }
+        }
+    }
 }
