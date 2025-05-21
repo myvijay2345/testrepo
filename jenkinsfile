@@ -2,7 +2,7 @@ pipeline {
     agent {
         docker {
             image 'my-terraform-image'
-            label 'terraform-alpine'
+           
             args  '-v /var/run/docker:/var/run/docker.sock'
         }
     }
