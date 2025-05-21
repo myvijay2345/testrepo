@@ -1,9 +1,9 @@
 pipeline {
     agent {
         docker {
-            image 'hashicorp/terraform:latest'
-            label 'LINUX-SLAVE'
-            args  '--entrypoint="" -u root -v /opt/jenkins/.aws:/root/.aws'
+            image 'my-terraform-image'
+            label 'terraform-alpine'
+            args  -v /var/run/docker:/var/run/docker.sock'
         }
     }
     options {
@@ -17,6 +17,11 @@ pipeline {
         string(defaultValue: "default", description: 'Which AWS Account (Boto profile) do you want to target?', name: 'AWS_PROFILE')
     }
     stages {
+
+        stage('checkout'){
+         steps{ git url: 'https://github.com/myvijay2345/testrepo.git',branch: 'main'
+              }
+        }
         stage('init') {
             steps {
                 sh 'terraform version'
