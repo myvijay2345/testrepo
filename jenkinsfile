@@ -1,16 +1,37 @@
 pipeline {
-    agent any
+    agent {
+docker{ image 'terraform-alpine'
+}}
 
-    stages {
-        stage('Build') {
-            steps {
-                sh 'terraform init'
-            }
-        }
-        stage('Test') {
-            steps {
-               sh 'terraform plan'
-            }
-        }
-      }
+parameters {
+        choice(
+            choices: ['preview' , 'apply' , 'show', 'preview-destroy' , 'destroy'],
+            description: 'Terraform action to apply',
+            name: 'action')
+        string(defaultValue: "default", description: 'Which AWS Account (Boto profile) do you want to target?', name: 'AWS_PROFILE')
     }
+    stages {
+        stage('init') {
+            steps {
+                sh 'terraform version'
+                sh 'terraform init -backend-config="bucket=${ACCOUNT}-tfstate" -backend-config="key=${TF_VAR_stack_name}/terraform.tfstate" -backend-config="region=us-west-2"'
+            }
+        }
+        stage('validate') {
+            when {
+                expression { params.action == 'preview' || params.action == 'apply' || params.action == 'destroy' }
+            }
+            steps {
+                sh 'terraform validate -var aws_profile=${AWS_PROFILE}'
+            }
+        }
+        stage('preview') {
+            when {
+                expression { params.action == 'preview' }
+            }
+            steps {
+                sh 'terraform plan -var aws_profile=${AWS_PROFILE}'
+            }
+        }
+}
+}
