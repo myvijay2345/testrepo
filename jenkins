@@ -6,7 +6,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git url: 'https://github.com/myvijay2345/testrepo.git
+                git url: 'https://github.com/myvijay2345/testrepo.git'
             }
         }
         stage('Terraform Init') {
