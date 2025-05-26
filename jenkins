@@ -1,28 +1,42 @@
-pipeline {
+jenkins {
     agent any
-  
     stages {
-       
-        stage('Terraform Init') {
+        stage('checkout') {
             steps {
-                sh 'terraform init'
+                checkout scm
             }
         }
-        stage('Terraform Plan') {
+        stage('terraform Plan') {
             steps {
-                sh 'terraform plan'
+                script {
+           docker.image('hashicorp/terraform:latest').inside 
+           dir('terraform') 
+           {
+                echo 'Running Terraform Plan...'
+                // Ensure the working directory is correct
+                sh 'pwd'
+                // Initialize Terraform and create a plan
+           {
+                    sh 'terraform init'
+                    sh 'terraform plan -out=tfplan'
+                }
+                }
+            }
+        }
+        stage('Deploy') {
+            steps {
+                echo 'Deploying...'
             }
         }
     }
     post {
         always {
-            echo 'Pipeline completed.'
+            echo 'This will always run'
         }
         success {
-            echo 'Terraform plan succeeded.'
+            echo 'This will run only if the pipeline is successful'
         }
         failure {
-            echo 'Terraform plan failed.'
+            echo 'This will run only if the pipeline fails'
         }
     }
-}
