@@ -1,10 +1,12 @@
+google {
+  project = "my-project"
+  region  = "us-central1"
+}
 terraform {
   required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = "~> 2.0"
+    google = {
+      source  = "hashicorp/google"
+      version = "~> 3.5"
     }
   }
-
-  required_version = ">= 0.12"
 }
